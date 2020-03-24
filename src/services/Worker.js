@@ -22,14 +22,31 @@ class Worker extends Service {
 
     async _startWorkLoop() {
         while (true) {
+            if (this._stopping) {
+                this._stopResolve();
+                return;
+            }
+
+            let hasMore = false;
+
             try {
-                await this._tick();
+                hasMore = await this._tick();
             } catch (err) {
                 Logger.error('Tick failed:', err);
             }
 
-            await this._idle(5000);
+            if (!hasMore) {
+                await this._idle(5000);
+            }
         }
+    }
+
+    async stop() {
+        return new Promise(resolve => {
+            this._stopResolve = resolve;
+            this._stopping = true;
+            this.wakeUp();
+        });
     }
 
     _idle(ms) {
@@ -66,8 +83,14 @@ class Worker extends Service {
         );
 
         for (const transfer of transfers) {
+            if (this._stopping) {
+                break;
+            }
+
             await this._processTransfer(transfer);
         }
+
+        return transfers.length === BATCH_SIZE;
     }
 
     async _processTransfer(transfer) {

@@ -32,6 +32,10 @@ class BlockListener extends Service {
 
         this._subscriber = new BlockSubscribe({
             handler: async data => {
+                if (this._stopping) {
+                    return;
+                }
+
                 try {
                     await this._handleEvent(data);
                 } catch (err) {
@@ -52,6 +56,10 @@ class BlockListener extends Service {
             Logger.error('Cant start block subscriber:', err);
             process.exit(1);
         }
+    }
+
+    async stop() {
+        this._stopping = true;
     }
 
     async _setLastBlock({ blockNum, sequence }) {

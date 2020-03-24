@@ -61,7 +61,7 @@ class TransferSaver {
     async _processTransfer(actionInfo, { from, to, quantity, memo }) {
         const [, symbol] = quantity.split(' ');
 
-        if (symbol !== 'CMN' || memo !== 'carbon order') {
+        if (symbol !== 'CMN') {
             return;
         }
 
