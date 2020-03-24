@@ -1,0 +1,9 @@
+.DS_Store
+.*.swp
+.idea
+.vscode
+node_modules
+db
+.env
+.npmrc
+docker-compose.yml
