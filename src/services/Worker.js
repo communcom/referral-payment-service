@@ -122,7 +122,7 @@ class Worker extends Service {
                 apiKey: env.GLS_PAYMENT_API_KEY,
                 userId: referralParent.userId,
                 quantity: bonusQuantity,
-                memo: `referral purchase bonus (${env.GLS_BONUS_PERCENT}%) for: ${user.username} (${user.userId})`,
+                memo: `referral purchase bonus (${env.GLS_BONUS_PERCENT}%) from: ${user.username} (${user.userId})`,
             });
 
             try {
