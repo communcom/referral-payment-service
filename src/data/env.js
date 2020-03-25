@@ -3,5 +3,8 @@ module.exports = {
     GLS_REGISTRATION_CONNECT: process.env.GLS_REGISTRATION_CONNECT,
     GLS_PAYMENT_CONNECT: process.env.GLS_PAYMENT_CONNECT,
     GLS_PAYMENT_API_KEY: process.env.GLS_PAYMENT_API_KEY,
+    GLS_TOKEN_SELLERS: process.env.GLS_TOKEN_SELLERS
+        ? JSON.parse(process.env.GLS_TOKEN_SELLERS)
+        : [],
     GLS_BONUS_PERCENT: Number(process.env.GLS_BONUS_PERCENT) || 0,
 };

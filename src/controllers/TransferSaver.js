@@ -1,6 +1,7 @@
 const core = require('cyberway-core-service');
 const { Logger } = core.utils;
 
+const env = require('../data/env');
 const TransferModel = require('../models/Transfer');
 
 class TransferSaver {
@@ -61,7 +62,7 @@ class TransferSaver {
     async _processTransfer(actionInfo, { from, to, quantity, memo }) {
         const [, symbol] = quantity.split(' ');
 
-        if (symbol !== 'CMN') {
+        if (symbol !== 'CMN' || !env.GLS_TOKEN_SELLERS.includes(from)) {
             return;
         }
 
