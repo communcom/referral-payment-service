@@ -34,7 +34,7 @@ module.exports = MongoDB.makeModel(
         },
         status: {
             type: String,
-            enum: ['pending', 'inprogress', 'empty-bonus', 'no-referral', 'sent'],
+            enum: ['pending', 'inprogress', 'empty-bonus', 'no-referral', 'out-date', 'sent'],
             default: 'pending',
             required: true,
         },

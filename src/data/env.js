@@ -7,4 +7,5 @@ module.exports = {
         ? JSON.parse(process.env.GLS_TOKEN_SELLERS)
         : [],
     GLS_BONUS_PERCENT: Number(process.env.GLS_BONUS_PERCENT) || 0,
+    GLS_BONUS_DAYS_LIMIT: process.env.GLS_BONUS_DAYS_LIMIT || 90,
 };
