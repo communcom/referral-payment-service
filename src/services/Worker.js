@@ -3,6 +3,7 @@ const { Service } = core.services;
 const { Logger } = core.utils;
 const env = require('../data/env');
 const TransferModel = require('../models/Transfer');
+const UserModel = require('../models/User');
 const { getConnector } = require('../utils/globals');
 
 const BATCH_SIZE = 20;
@@ -97,6 +98,30 @@ class Worker extends Service {
         await this._updateTransferStatus(transfer, 'inprogress');
 
         try {
+            if (!(await this._checkTimeLimit(transfer))) {
+                await this._updateTransferStatus(transfer, 'out-date');
+                return;
+            }
+
+            try {
+                await UserModel.updateOne(
+                    {
+                        userId: transfer.receiverUserId,
+                        firstPurchaseAt: null,
+                    },
+                    {
+                        $set: {
+                            firstPurchaseAt: new Date(),
+                        },
+                    },
+                    {
+                        upsert: true,
+                    }
+                );
+            } catch (err) {
+                Logger.warn('Cant save user:', err);
+            }
+
             const { user, referralParent } = await getConnector().callService(
                 'registration',
                 'getReferralParent',
@@ -140,6 +165,37 @@ class Worker extends Service {
                 nextTryAt: Date.now() + this._calculatePenalty(transfer.failCount + 1),
             });
         }
+    }
+
+    async _checkTimeLimit(transfer) {
+        const userModel = await UserModel.findOne(
+            {
+                userId: transfer.receiverUserId,
+            },
+            {
+                registration: true,
+                firstPurchaseAt: true,
+            },
+            {
+                lean: true,
+            }
+        );
+
+        if (userModel) {
+            let date = null;
+
+            if (userModel.registration && userModel.registration.time) {
+                date = userModel.registration.time;
+            } else {
+                date = userModel.firstPurchaseAt;
+            }
+
+            if (date.getTime() + env.GLS_BONUS_DAYS_LIMIT * 24 * 60 * 60 * 1000 < Date.now()) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     async _updateTransferStatus(transfer, status, updates = null) {

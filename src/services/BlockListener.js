@@ -5,6 +5,7 @@ const { Logger } = core.utils;
 const MetaModel = require('../models/Meta');
 const env = require('../data/env');
 const TransferSaver = require('../controllers/TransferSaver');
+const UserSaver = require('../controllers/UserSaver');
 
 class BlockListener extends Service {
     constructor({ worker }) {
@@ -25,6 +26,8 @@ class BlockListener extends Service {
 
             meta = await MetaModel.create(initialMeta);
         }
+
+        this._userSaver = new UserSaver();
 
         this._transferSaver = new TransferSaver({
             worker: this._worker,
@@ -82,8 +85,11 @@ class BlockListener extends Service {
      */
     async _handleEvent({ type, data }) {
         switch (type) {
-            case BlockSubscribe.EVENT_TYPES.IRREVERSIBLE_BLOCK:
+            case BlockSubscribe.EVENT_TYPES.BLOCK:
                 await this._handleBlock(data);
+                break;
+            case BlockSubscribe.EVENT_TYPES.IRREVERSIBLE_BLOCK:
+                await this._handleIrrBlock(data);
                 await this._setLastBlock(data);
                 break;
             default:
@@ -93,7 +99,18 @@ class BlockListener extends Service {
 
     async _handleBlock(block) {
         try {
-            return await this._transferSaver.processBlock(block);
+            await this._userSaver.processBlock(block);
+        } catch (err) {
+            Logger.error(
+                `Users saving: Cant disperse block, num: ${block.blockNum}, id: ${block.id}`,
+                err
+            );
+        }
+    }
+
+    async _handleIrrBlock(block) {
+        try {
+            await this._transferSaver.processBlock(block);
         } catch (err) {
             Logger.error(`Cant disperse block, num: ${block.blockNum}, id: ${block.id}`, err);
             process.exit(1);
