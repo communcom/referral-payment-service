@@ -36,9 +36,9 @@ class UserSaver {
                 userId,
             },
             {
-                username,
-                registration: {
-                    time: meta.blockTime,
+                $set: {
+                    username,
+                    registeredAt: meta.blockTime,
                 },
             },
             {

@@ -12,13 +12,9 @@ module.exports = MongoDB.makeModel(
             type: String,
             required: true,
         },
-        registration: {
-            time: {
-                type: Date,
-            },
-        },
-        firstPurchaseAt: {
+        registeredAt: {
             type: Date,
+            required: true,
         },
     },
     {
