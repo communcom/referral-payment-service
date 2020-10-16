@@ -9,7 +9,7 @@
   },
   "keywords": [],
   "author": "Commun team",
-  "license": "ISC",
+  "license": "MIT",
   "dependencies": {
     "cyberway-core-service": "^3.59.2"
   },

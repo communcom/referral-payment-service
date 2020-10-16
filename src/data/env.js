@@ -8,4 +8,5 @@ module.exports = {
         : [],
     GLS_BONUS_PERCENT: Number(process.env.GLS_BONUS_PERCENT) || 0,
     GLS_BONUS_DAYS_LIMIT: process.env.GLS_BONUS_DAYS_LIMIT || 90,
+    GLS_BONUS_START_DATE: new Date(process.env.GLS_BONUS_START_DATE || '2020-03-30T14:00:00.000Z'),
 };

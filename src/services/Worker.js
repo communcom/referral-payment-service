@@ -103,25 +103,6 @@ class Worker extends Service {
                 return;
             }
 
-            try {
-                await UserModel.updateOne(
-                    {
-                        userId: transfer.receiverUserId,
-                        firstPurchaseAt: null,
-                    },
-                    {
-                        $set: {
-                            firstPurchaseAt: new Date(),
-                        },
-                    },
-                    {
-                        upsert: true,
-                    }
-                );
-            } catch (err) {
-                Logger.warn('Cant save user:', err);
-            }
-
             const { user, referralParent } = await getConnector().callService(
                 'registration',
                 'getReferralParent',
@@ -173,29 +154,22 @@ class Worker extends Service {
                 userId: transfer.receiverUserId,
             },
             {
-                registration: true,
-                firstPurchaseAt: true,
+                registeredAt: true,
             },
             {
                 lean: true,
             }
         );
 
+        let registeredAt = 0;
+
         if (userModel) {
-            let date = null;
-
-            if (userModel.registration && userModel.registration.time) {
-                date = userModel.registration.time;
-            } else {
-                date = userModel.firstPurchaseAt;
-            }
-
-            if (date.getTime() + env.GLS_BONUS_DAYS_LIMIT * 24 * 60 * 60 * 1000 < Date.now()) {
-                return false;
-            }
+            registeredAt = userModel.registeredAt.getTime();
         }
 
-        return true;
+        const limitDate = Math.max(env.GLS_BONUS_START_DATE.getTime() || 0, registeredAt);
+
+        return limitDate + env.GLS_BONUS_DAYS_LIMIT * 24 * 60 * 60 * 1000 >= Date.now();
     }
 
     async _updateTransferStatus(transfer, status, updates = null) {
